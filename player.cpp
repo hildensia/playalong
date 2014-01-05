@@ -1,5 +1,6 @@
 #include "player.h"
 #include "sound_stream.h"
+#include "util.h"
 #include <ao/ao.h>
 #include <iostream>
 #include <thread>
@@ -57,26 +58,44 @@ void Player::play() {
 
 void Player::stop() {
   m_stop = true;
+  m_player_thread.join();
 }
 
 void Player::pause() {
   m_pause = !m_pause;  
 }
   
-void Player::seek(int ms_pos) {
+void Player::seek(pos_t ms_pos) {
+  ms_pos = limit<int>(ms_pos, 0, get_end());
   m_song.set_pos(ms_pos);  
 }
 
-int Player::get_pos() {
+pos_t Player::get_pos() {
   return m_song.get_pos();  
 }
 
-int Player::get_marker(const marker_t marker) const {
+pos_t Player::get_end() {
+  return m_song.get_duration();
+}
+
+pos_t Player::get_marker(const marker_t marker) const {
   if (marker == Marker_A) return m_a_marker;  
   else return m_b_marker;  
 }
 
-void Player::set_marker(const marker_t marker, const int ms_pos) {
-  if (marker == Marker_A) m_a_marker = ms_pos;  
-  else m_b_marker = ms_pos;
+void Player::set_marker(const marker_t marker, const pos_t ms_pos) {
+  pos_t pos = limit<pos_t>(ms_pos, 0, get_end());
+
+  if (marker == Marker_A) {
+    if (m_b_marker == 0 || pos <= m_b_marker)
+      m_a_marker = pos;   
+  }
+  else {
+    if (pos > m_a_marker || pos == 0)
+      m_b_marker = pos;  
+  }
+}
+
+metadata_t Player::get_metadata() {
+  return m_song.get_metadata();  
 }

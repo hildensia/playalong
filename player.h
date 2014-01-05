@@ -4,6 +4,7 @@
 #include <ao/ao.h>
 #include <thread>
 #include <atomic>
+#include "types.h"
 
 class SoundStream;
 
@@ -30,11 +31,15 @@ class Player {
     void pause();
     void stop();
     
-    void seek(int ms_pos);
-    int get_pos();
+    void seek(pos_t ms_pos);
+    pos_t get_pos();
 
-    int get_marker(const marker_t marker) const;
-    void set_marker(const marker_t marker, const int ms_pos);
+    pos_t get_end();
+
+    pos_t get_marker(const marker_t marker) const;
+    void set_marker(const marker_t marker, const pos_t ms_pos);
+
+    metadata_t get_metadata();
 };
 
 #endif
