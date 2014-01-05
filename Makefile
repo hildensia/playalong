@@ -4,7 +4,7 @@ LD = g++
 CXXFLAGS=-g -std=c++0x
 LDFLAGS=-lavcodec -lavformat -lavutil -lstdc++ -lm -lao -lncurses
 
-OBJS = main.o player.o sound_stream.o curses_interface.o
+OBJS = main.o player.o sound_stream.o curses_interface.o util.o
 
 
 default: playalong
