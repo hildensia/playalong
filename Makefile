@@ -1,10 +1,11 @@
 CXX = g++
 LD = g++
 
-CXXFLAGS=-g
-LDFLAGS=-lavcodec -lavformat -lavutil -lstdc++ -lm -lao
+CXXFLAGS=-g -std=c++0x
+LDFLAGS=-lavcodec -lavformat -lavutil -lstdc++ -lm -lao -lncurses
 
-OBJS = main.o player.o sound_stream.o
+OBJS = main.o player.o sound_stream.o curses_interface.o
+
 
 default: playalong
 
