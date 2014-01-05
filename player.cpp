@@ -2,6 +2,7 @@
 #include "sound_stream.h"
 #include <ao/ao.h>
 #include <iostream>
+#include <thread>
 
 extern "C" {
 #include "libavutil/mathematics.h"
@@ -10,7 +11,7 @@ extern "C" {
 #include "libavcodec/avcodec.h"
 }
 
-Player::Player(SoundStream& song) : m_stop(true), m_song(song) {
+Player::Player(SoundStream& song) : m_a_marker(0), m_b_marker(0), m_stop(true), m_pause(false), m_song(song) {
   //initialize AO lib
   ao_initialize();
   m_driver = ao_default_driver_id();
@@ -36,11 +37,12 @@ Player::Player(SoundStream& song) : m_stop(true), m_song(song) {
   m_sformat.matrix = 0;
 }
 
-void Player::play() {
+void Player::detached_play() {
   ao_device *adevice = ao_open_live(m_driver, &m_sformat, NULL);
   m_stop = false;
   while(!m_stop) {
-    if (m_song.get_pos() > m_b_marker)
+    if (m_pause) continue;
+    if (m_b_marker && m_song.get_pos() > m_b_marker)
       m_song.set_pos(m_a_marker);
     uint frame_size;
     uint16_t *frame = m_song.get_next_frame(frame_size);
@@ -49,13 +51,22 @@ void Player::play() {
   ao_shutdown();
 }
 
+void Player::play() {
+  m_player_thread = std::thread(&Player::detached_play, this);  
+}
+
 void Player::stop() {
   m_stop = true;
+}
+
+void Player::pause() {
+  m_pause = !m_pause;  
 }
   
 void Player::seek(int ms_pos) {
   m_song.set_pos(ms_pos);  
 }
+
 int Player::get_pos() {
   return m_song.get_pos();  
 }
@@ -64,6 +75,7 @@ int Player::get_marker(const marker_t marker) const {
   if (marker == Marker_A) return m_a_marker;  
   else return m_b_marker;  
 }
+
 void Player::set_marker(const marker_t marker, const int ms_pos) {
   if (marker == Marker_A) m_a_marker = ms_pos;  
   else m_b_marker = ms_pos;

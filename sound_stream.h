@@ -7,6 +7,7 @@ extern "C" {
 }
 
 #include <string>
+#include <mutex>
 
 class SoundStream {
   private:
@@ -24,11 +25,18 @@ class SoundStream {
 
     uint pos;
 
+    std::recursive_mutex m_mtx;
+
   public:
     SoundStream(std::string filename);
     ~SoundStream();
     uint get_pos();
     void set_pos(uint ms);
+
+    /** Should the stream loop, i.e. restart from the beginning after the last
+     *  frame?
+     **/
+    void set_loop(bool loop);
 
     uint16_t *get_next_frame(uint& frame_size);
 

@@ -55,16 +55,20 @@ SoundStream::SoundStream(std::string filename) : pos(0) {
 }
 
 uint SoundStream::get_sample_rate() {
+  std::lock_guard<std::recursive_mutex> cs(m_mtx);
   return m_ctx->sample_rate;  
 }
 AVSampleFormat SoundStream::get_sample_fmt() {
+  std::lock_guard<std::recursive_mutex> cs(m_mtx);
   return m_ctx->sample_fmt;
 }
 uint SoundStream::get_channels() {
+  std::lock_guard<std::recursive_mutex> cs(m_mtx);
   return m_ctx->channels;  
 }
 
 uint16_t *SoundStream::get_next_frame(uint& frame_size) {
+  std::lock_guard<std::recursive_mutex> cs(m_mtx);
   int buffer_size=AVCODEC_MAX_AUDIO_FRAME_SIZE + FF_INPUT_BUFFER_PADDING_SIZE;
 
   uint8_t *buffer = new uint8_t[buffer_size];
@@ -177,10 +181,17 @@ SoundStream::~SoundStream() {
 }
 
 uint SoundStream::get_pos() {
+  std::lock_guard<std::recursive_mutex> cs(m_mtx);
   return pos;
 }
 
+void SoundStream::set_loop(bool loop) {
+  std::lock_guard<std::recursive_mutex> cs(m_mtx);
+  m_loop = loop;
+}
+
 void SoundStream::set_pos(uint ms) {
+  std::lock_guard<std::recursive_mutex> cs(m_mtx);
   int flag = 0;
   if (ms < pos) flag |= AVSEEK_FLAG_BACKWARD;
 
