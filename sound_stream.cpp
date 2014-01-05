@@ -10,12 +10,14 @@ extern "C" {
 #include <string>
 #include <limits>
 
+#include "util.h"
+
 #define AVCODEC_MAX_AUDIO_FRAME_SIZE 192000 // 1 second of 48khz 32bit audio
 
 using std::cerr;
 using std::endl;
 
-SoundStream::SoundStream(std::string filename) : pos(0) {
+SoundStream::SoundStream(std::string filename) : m_pos(0), m_loop(true) {
   m_container = avformat_alloc_context();
   if (avformat_open_input(&m_container, filename.c_str(), NULL, NULL) < 0) {
     cerr<<"Could not open file"<<endl;
@@ -24,8 +26,6 @@ SoundStream::SoundStream(std::string filename) : pos(0) {
   if (avformat_find_stream_info(m_container, NULL) < 0){
     cerr<<"Could not find file info"<<endl;
   }
-
-  av_dump_format(m_container, 0, filename.c_str(), false);
 
   m_stream_id=-1;
   for (uint i = 0; i < m_container->nb_streams; i++) {
@@ -51,7 +51,6 @@ SoundStream::SoundStream(std::string filename) : pos(0) {
   }
   av_init_packet(&packet);
   frame = avcodec_alloc_frame();
-
 }
 
 uint SoundStream::get_sample_rate() {
@@ -90,7 +89,7 @@ uint16_t *SoundStream::get_next_frame(uint& frame_size) {
       return NULL;
   }
 
-  pos += (uint) (packet.duration * m_container->streams[m_stream_id]->time_base.num * 1000. / m_container->streams[m_stream_id]->time_base.den);
+  m_pos += (uint) (packet.duration * m_container->streams[m_stream_id]->time_base.num * 1000. / m_container->streams[m_stream_id]->time_base.den);
 
   if(packet.stream_index==m_stream_id){
     int len = avcodec_decode_audio4(m_ctx, frame, &frameFinished, &packet);
@@ -180,9 +179,9 @@ SoundStream::~SoundStream() {
   av_close_input_file(m_container);
 }
 
-uint SoundStream::get_pos() {
+pos_t SoundStream::get_pos() {
   std::lock_guard<std::recursive_mutex> cs(m_mtx);
-  return pos;
+  return m_pos;
 }
 
 void SoundStream::set_loop(bool loop) {
@@ -190,14 +189,24 @@ void SoundStream::set_loop(bool loop) {
   m_loop = loop;
 }
 
-void SoundStream::set_pos(uint ms) {
+void SoundStream::set_pos(pos_t ms) {
   std::lock_guard<std::recursive_mutex> cs(m_mtx);
-  int flag = 0;
-  if (ms < pos) flag |= AVSEEK_FLAG_BACKWARD;
+  int flag = AVSEEK_FLAG_ANY;
+  if (ms < m_pos) flag |= AVSEEK_FLAG_BACKWARD;
 
   AVStream *stream = m_container->streams[m_stream_id];
   double sec = ms / 1000.;
   int64_t ts = (int64_t) (sec / (stream->time_base.num / (double) stream->time_base.den));
   av_seek_frame(m_container, m_stream_id, ts, flag);
-  pos = ms;
+  m_pos = ms;
+}
+pos_t SoundStream::get_duration() {
+  std::lock_guard<std::recursive_mutex> cs(m_mtx);
+  AVStream *stream = m_container->streams[m_stream_id];
+
+  return (int64_t) (stream->duration * 1000 * stream->time_base.num / (double) stream->time_base.den);
+}
+metadata_t SoundStream::get_metadata() {
+  std::lock_guard<std::recursive_mutex> cs(m_meta_mtx);
+  return av_dict_to_metadata(m_metadata);
 }

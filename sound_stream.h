@@ -1,6 +1,8 @@
 #ifndef __SOUND_STREAM_H__
 #define __SOUND_STREAM_H__
 
+#include "types.h"
+
 extern "C" {
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
@@ -8,6 +10,8 @@ extern "C" {
 
 #include <string>
 #include <mutex>
+#include <map>
+
 
 class SoundStream {
   private:
@@ -23,15 +27,16 @@ class SoundStream {
 
     bool m_loop;
 
-    uint pos;
+    pos_t m_pos;
 
     std::recursive_mutex m_mtx;
+    std::recursive_mutex m_meta_mtx;
 
   public:
     SoundStream(std::string filename);
     ~SoundStream();
-    uint get_pos();
-    void set_pos(uint ms);
+    pos_t get_pos();
+    void set_pos(pos_t ms);
 
     /** Should the stream loop, i.e. restart from the beginning after the last
      *  frame?
@@ -44,6 +49,9 @@ class SoundStream {
     AVSampleFormat get_sample_fmt();
     uint get_sample_rate();
     uint get_frame_size();
+    pos_t get_duration(); 
+
+    metadata_t get_metadata();
 };
 
 #endif
