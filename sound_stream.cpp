@@ -21,10 +21,12 @@ SoundStream::SoundStream(std::string filename) : m_pos(0), m_loop(true) {
   m_container = avformat_alloc_context();
   if (avformat_open_input(&m_container, filename.c_str(), NULL, NULL) < 0) {
     cerr<<"Could not open file"<<endl;
+    exit(-1);
   }
 
   if (avformat_find_stream_info(m_container, NULL) < 0){
     cerr<<"Could not find file info"<<endl;
+    exit(-1);
   }
 
   m_stream_id=-1;
@@ -36,6 +38,7 @@ SoundStream::SoundStream(std::string filename) : m_pos(0), m_loop(true) {
   }
   if (m_stream_id == -1) {
     cerr<<"Could not find Audio Stream"<<endl;
+    exit(-1);
   }
 
   m_metadata = m_container->metadata;
@@ -44,10 +47,12 @@ SoundStream::SoundStream(std::string filename) : m_pos(0), m_loop(true) {
 
   if (m_codec == NULL) {
     cerr<<("cannot find codec!")<<endl;
+    exit(-1);
   }
 
   if (avcodec_open2(m_ctx,m_codec,NULL) < 0){
     cerr<<("Codec cannot be opended!")<<endl;
+    exit(-1);
   }
   av_init_packet(&packet);
   frame = avcodec_alloc_frame();
