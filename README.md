@@ -29,12 +29,14 @@ Keymaps
 =======
 
 
-    Used keys are:
-    
-    q   e       u
-      s d f   h j k
-                         
-         [space]      <   >
+    Used keys are (think of two arrow crosses):
+    ____________________________
+    |                          |
+    | q   e       u            |
+    |   s d f   h j k          |
+    |                          |
+    |      [space]      <   >  |
+    |__________________________|
 
     q - Quit
 
