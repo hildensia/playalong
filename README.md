@@ -65,7 +65,7 @@ Requirements:
 * a C++11 capable compiler (tested with g++ 4.8 and clang++ 3.3)
 
 
-If you have these libs installed installed, it's as simple as
+If you have these libs installed, it's as simple as
 
     $ make
 
