@@ -50,3 +50,23 @@ Keymaps
 
     [space] - pause
     [left/right arrow] - seek in song
+
+Installation
+============
+
+Requirements:
+* libao
+* libavcodec
+* libavformat
+* libavutil
+* ncurses
+* a C++11 capable compiler (tested with g++ 4.8 and clang++ 3.3)
+
+
+If you have these libs installed installed, it's as simple as
+
+    $ make
+
+If you want to install it system-wide do as root
+
+    $ make install
