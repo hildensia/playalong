@@ -9,7 +9,7 @@ set very fine grained, to make it easy to match an exact bar. (+/- 10 ms).
 This is very handy, if you want to play along some part of a song.
 
 Features
-========
+--------
 
 * Plays whatever is supported by libavcodec (wav, mp3, ogg, flac...)
 * Plays to whatever libao supports (alsa, oss...)
@@ -21,12 +21,12 @@ Features
 
 
 Future Features
-===============
+---------------
 * slow down playback (without changing the pitch)
 * make key mappings configurable
 
 Keymaps
-=======
+-------
 
 
     Used keys are (think of two arrow crosses):
@@ -54,7 +54,7 @@ Keymaps
     [left/right arrow] - seek in song
 
 Installation
-============
+------------
 
 Requirements:
 * libao
@@ -65,7 +65,7 @@ Requirements:
 * a C++11 capable compiler (tested with g++ 4.8 and clang++ 3.3)
 
 
-If you have these libs installed installed, it's as simple as
+If you have these libs installed, it's as simple as
 
     $ make
 
