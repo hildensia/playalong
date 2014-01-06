@@ -15,5 +15,8 @@ playalong: $(OBJS)
 %.o:%.cpp
 	$(CXX) $(CXXFLAGS) -c $<
 
+install:
+	install playalong /usr/local/bin/playalong
+
 clean:
 	rm *.o
