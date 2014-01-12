@@ -17,7 +17,7 @@ extern "C" {
 using std::cerr;
 using std::endl;
 
-SoundStream::SoundStream(std::string filename) : m_pos(0), m_loop(true) {
+SoundFile::SoundFile(std::string filename) : m_pos(0), m_loop(true) {
   m_container = avformat_alloc_context();
   if (avformat_open_input(&m_container, filename.c_str(), NULL, NULL) < 0) {
     cerr<<"Could not open file"<<endl;
@@ -58,28 +58,29 @@ SoundStream::SoundStream(std::string filename) : m_pos(0), m_loop(true) {
   frame = avcodec_alloc_frame();
 }
 
-uint SoundStream::get_sample_rate() {
+uint SoundFile::get_sample_rate() {
   std::lock_guard<std::recursive_mutex> cs(m_mtx);
   return m_ctx->sample_rate;  
 }
-AVSampleFormat SoundStream::get_sample_fmt() {
+AVSampleFormat SoundFile::get_sample_fmt() {
   std::lock_guard<std::recursive_mutex> cs(m_mtx);
   return m_ctx->sample_fmt;
 }
-uint SoundStream::get_channels() {
+uint SoundFile::get_channels() {
   std::lock_guard<std::recursive_mutex> cs(m_mtx);
   return m_ctx->channels;  
 }
 
-uint16_t *SoundStream::get_next_frame(uint& frame_size) {
+uint16_t *SoundFile::get_next_frame(uint& frame_size) {
   std::lock_guard<std::recursive_mutex> cs(m_mtx);
   int buffer_size=AVCODEC_MAX_AUDIO_FRAME_SIZE + FF_INPUT_BUFFER_PADDING_SIZE;
 
-  uint8_t *buffer = new uint8_t[buffer_size];
+  uint8_t *buffer = (uint8_t*) malloc(buffer_size * sizeof(uint8_t));//new uint8_t[buffer_size];
   packet.data = buffer;
   packet.size = buffer_size;
 
-  uint8_t *samples= new uint8_t[buffer_size];
+  //uint8_t *samples= new uint8_t[buffer_size];
+  uint8_t *samples = (uint8_t*) malloc(buffer_size * sizeof(uint8_t));//new uint8_t[buffer_size];
   int len;
   int frameFinished=0;
 
@@ -178,23 +179,23 @@ uint16_t *SoundStream::get_next_frame(uint& frame_size) {
   }
 }
 
-SoundStream::~SoundStream() {
+SoundFile::~SoundFile() {
   av_free_packet(&packet);
   avcodec_close(m_ctx);
-  av_close_input_file(m_container);
+  avformat_close_input(&m_container);
 }
 
-pos_t SoundStream::get_pos() {
+pos_t SoundFile::get_pos() {
   std::lock_guard<std::recursive_mutex> cs(m_mtx);
   return m_pos;
 }
 
-void SoundStream::set_loop(bool loop) {
+void SoundFile::set_loop(bool loop) {
   std::lock_guard<std::recursive_mutex> cs(m_mtx);
   m_loop = loop;
 }
 
-void SoundStream::set_pos(pos_t ms) {
+void SoundFile::set_pos(pos_t ms) {
   std::lock_guard<std::recursive_mutex> cs(m_mtx);
   int flag = AVSEEK_FLAG_ANY;
   if (ms < m_pos) flag |= AVSEEK_FLAG_BACKWARD;
@@ -205,13 +206,13 @@ void SoundStream::set_pos(pos_t ms) {
   av_seek_frame(m_container, m_stream_id, ts, flag);
   m_pos = ms;
 }
-pos_t SoundStream::get_duration() {
+pos_t SoundFile::get_duration() {
   std::lock_guard<std::recursive_mutex> cs(m_mtx);
   AVStream *stream = m_container->streams[m_stream_id];
 
   return (int64_t) (stream->duration * 1000 * stream->time_base.num / (double) stream->time_base.den);
 }
-metadata_t SoundStream::get_metadata() {
+metadata_t SoundFile::get_metadata() {
   std::lock_guard<std::recursive_mutex> cs(m_meta_mtx);
   return av_dict_to_metadata(m_metadata);
 }
