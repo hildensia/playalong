@@ -42,7 +42,11 @@ void Player::detached_play() {
   ao_device *adevice = ao_open_live(m_driver, &m_sformat, NULL);
   m_stop = false;
   while(!m_stop) {
-    if (m_pause) continue;
+    if (m_pause) {
+      std::unique_lock<std::mutex> lck(m_pause_mtx);  
+      m_pause_cv.wait(lck);
+    }
+
     if (m_b_marker && m_song.get_pos() > m_b_marker)
       m_song.set_pos(m_a_marker);
     uint frame_size;
@@ -58,11 +62,14 @@ void Player::play() {
 
 void Player::stop() {
   m_stop = true;
+  m_pause_cv.notify_all();
   m_player_thread.join();
 }
 
 void Player::pause() {
   m_pause = !m_pause;  
+  if(!m_pause)
+    m_pause_cv.notify_all();
 }
   
 void Player::seek(pos_t ms_pos) {

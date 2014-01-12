@@ -4,6 +4,7 @@
 #include <ao/ao.h>
 #include <thread>
 #include <atomic>
+#include <condition_variable>
 #include "types.h"
 
 class SoundStream;
@@ -22,6 +23,10 @@ class Player {
     ao_sample_format m_sformat;
 
     std::thread m_player_thread;
+
+    std::mutex m_pause_mtx;
+    std::condition_variable m_pause_cv;
+
     void detached_play();
 
   public:
