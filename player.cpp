@@ -52,6 +52,7 @@ void Player::detached_play() {
     uint frame_size;
     uint16_t *frame = m_song.get_next_frame(frame_size);
     ao_play(adevice, (char*) frame, frame_size);
+    free(frame);
   } 
   ao_shutdown();
 }
