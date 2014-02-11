@@ -1,6 +1,10 @@
 #include "util.h"
 #include <iomanip>
 #include <sstream>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 extern "C" {
 #include "libavutil/dict.h"
@@ -31,4 +35,9 @@ metadata_t av_dict_to_metadata(AVDictionary* dict) {
     metadata[tag->key] = tag->value;  
   }
   return metadata;
+}
+void print_complex(fftw_complex* cpx, size_t size) {
+  for (uint i = 0; i < size; ++i) {
+    cout << cpx[i][0] << " + " << cpx[i][1] << endl;
+  }  
 }
