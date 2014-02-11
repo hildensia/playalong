@@ -1,6 +1,7 @@
 #include "sound_stream.h"
 #include "player.h"
 #include "curses_interface.h"
+#include "phase_vocoder.h"
 #include <string>
 #include <iostream>
 extern "C" {
@@ -16,9 +17,15 @@ int main(int argc, char **argv) {
   av_register_all();
   av_log_set_level(AV_LOG_QUIET);
 
-  SoundStream song(file);  
+  SoundFile song(file);  
 
-  Player player(song);
+  PhaseVocoder filtered(song);
+  Player player(filtered);
+
+  //Filter f2(song);
+  //Player player(f2);
+  
+  //Player player(song);
   player.play();
 
   CursesInterface interface(player);
