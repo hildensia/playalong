@@ -75,12 +75,12 @@ uint16_t *SoundFile::get_next_frame(uint& frame_size) {
   std::lock_guard<std::recursive_mutex> cs(m_mtx);
   int buffer_size=AVCODEC_MAX_AUDIO_FRAME_SIZE + FF_INPUT_BUFFER_PADDING_SIZE;
 
-  uint8_t *buffer = (uint8_t*) malloc(buffer_size * sizeof(uint8_t));//new uint8_t[buffer_size];
+  uint8_t *buffer = (uint8_t*) malloc(buffer_size * sizeof(uint8_t));
   packet.data = buffer;
   packet.size = buffer_size;
 
   //uint8_t *samples= new uint8_t[buffer_size];
-  uint8_t *samples = (uint8_t*) malloc(buffer_size * sizeof(uint8_t));//new uint8_t[buffer_size];
+  uint8_t *samples = (uint8_t*) malloc(buffer_size * sizeof(uint8_t));
   int len;
   int frameFinished=0;
 
@@ -110,6 +110,8 @@ uint16_t *SoundFile::get_next_frame(uint& frame_size) {
     if(frameFinished){
       int write_p=0;
 
+      //std::cout << "PlaneSize:" << plane_size <<std::endl;
+
       switch (m_ctx->sample_fmt){
         case AV_SAMPLE_FMT_S16P:
           for (int nb=0; nb<plane_size/sizeof(uint16_t); nb++) {
@@ -118,7 +120,7 @@ uint16_t *SoundFile::get_next_frame(uint& frame_size) {
               write_p++;
             }
           }
-          frame_size = (plane_size) * m_ctx->channels;
+          frame_size = (plane_size/sizeof(uint16_t)) * m_ctx->channels;
           break;
           
         case AV_SAMPLE_FMT_FLTP:
