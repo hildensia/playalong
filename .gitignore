@@ -5,3 +5,5 @@ playalong
 *.swp
 gmon.out
 *.data
+octave-core
+*.ipynb
