@@ -31,4 +31,11 @@ std::vector<T> scale(std::vector<T> v) {
     r[i] = v[i]/(*m);
   return r;
 }
+template<class T>
+std::vector<T> scale(std::vector<T> v, T max) {
+  std::vector<T> r(v.size());
+  for (uint i=0; i<v.size(); ++i)
+    r[i] = v[i]/max;
+  return r;
+}
 #endif
