@@ -34,6 +34,7 @@ class PhaseVocoder : public Filter {
     virtual uint16_t *get_next_frame(uint& frame_size);
     virtual pos_t get_pos();
     virtual void set_pos(pos_t ms);
+    virtual pos_t get_duration(); 
     virtual ~PhaseVocoder() { };
 };
 

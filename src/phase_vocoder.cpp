@@ -23,6 +23,14 @@ double reect(const int n, const int M) {
   return 1;  
 }
 
+void save(istft_t& data, const char* name) {
+  std::ofstream out(name);
+  for(uint i; i<data.size(); ++i) {
+    out << data[i] << ", ";
+  }
+  out.close();
+}
+
 stft_t phase_adjustment(stft_t& data, int bin_num, double stretching) {
   stft_t stretched(data.size() * stretching);
   for(uint i = 0; i<stretched.size(); ++i) {
@@ -39,10 +47,6 @@ stft_t phase_adjustment(stft_t& data, int bin_num, double stretching) {
     double data_pos = frame / stretching;
     uint data_frame = (uint) data_pos;
     double frac = data_pos - data_frame;
-    cout << "frame = " << frame << endl;
-    cout << "data_pos = " << data_pos << endl;
-    cout << "data_frame = " << data_frame << endl;
-    cout << "frac = " << frac << endl;
 
     for (uint bin = 0; bin < bin_num/2 + 1; ++bin) {
 
@@ -84,24 +88,23 @@ PhaseVocoder::PhaseVocoder(SoundStream& input) : Filter(input), m_pos(0), m_spee
     uint16_t *d = input.get_next_frame(size);
     pos = input.get_pos();
     for (uint i=0; i<size; i+=2 ) { // += in_channels) {
-      m_data_left.push_back(d[i]/(double) std::numeric_limits<uint16_t>::max());
-      m_data_right.push_back(d[i+1]/(double) std::numeric_limits<uint16_t>::max());
+      m_data_left.push_back((*reinterpret_cast<int*>(&d[i]))/(double)std::numeric_limits<int>::max());
+      m_data_right.push_back((*reinterpret_cast<int*>(&d[i]))/(double)std::numeric_limits<int>::max());
     }
     free(d);
   }
   std::cout << "done." << std::endl;
   
   int hop_size = m_window_size / 4;
-  double scaler = 1.2;
+  double scaler = .8;
 
   m_stft_data_left = stft(m_data_left, hanning, m_window_size, hop_size);
-  m_stft_data_right = stft(m_data_right, hanning, m_window_size, hop_size);
-
   stft_t scaled_data_left = phase_adjustment(m_stft_data_left, m_window_size, scaler);
-  stft_t scaled_data_right = phase_adjustment(m_stft_data_right, m_window_size, scaler);
+  m_data_left = scale(istft(scaled_data_left, hanning, m_window_size, hop_size), m_window_size);
 
-  m_data_left = scale(istft(scaled_data_left, hanning, m_window_size, hop_size));
-  m_data_right = scale(istft(scaled_data_right, hanning, m_window_size, hop_size));
+  m_stft_data_right = stft(m_data_right, hanning, m_window_size, hop_size);
+  stft_t scaled_data_right = phase_adjustment(m_stft_data_right, m_window_size, scaler);
+  m_data_right = scale(istft(scaled_data_right, hanning, m_window_size, hop_size), m_window_size);
 }
 
 uint16_t *PhaseVocoder::get_next_frame(uint& frame_size) {
@@ -109,17 +112,22 @@ uint16_t *PhaseVocoder::get_next_frame(uint& frame_size) {
   uint16_t *result = new uint16_t[2*ws];
   for (uint i=0; i<ws/2; i++) {
     result[2*i] = (uint16_t) (m_data_left[m_pos + i] * std::numeric_limits<uint16_t>::max());
-    result[2*i+1] = (uint16_t) (m_data_right[m_pos + i] * std::numeric_limits<uint16_t>::max());
+    result[2*i+1] = (uint16_t) (m_data_right[m_pos + i] * std::numeric_limits<int16_t>::max());
   }
   m_pos += ws/2;
+  if (m_pos > m_data_left.size()) m_pos = 0;
   frame_size = 2*ws;
   return result;
 }
 
+pos_t PhaseVocoder::get_duration() {
+  return .8 * input.get_duration();
+}
+
 pos_t PhaseVocoder::get_pos() {
-  return m_pos/(m_data_left.size() * 2) * input.get_duration();  
+  return m_pos/(m_data_left.size()) * this->get_duration();  
 }
 
 void PhaseVocoder::set_pos(pos_t ms) {
-  m_pos = (ms / (double) input.get_duration()) * (m_data_left.size() * 2);
+  m_pos = (ms / (double) this->get_duration()) * (m_data_left.size());
 }
