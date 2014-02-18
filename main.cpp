@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
   av_register_all();
   av_log_set_level(AV_LOG_QUIET);
 
-  SoundStream song(file);  
+  SoundFile song(file);  
 
   Player player(song);
   player.play();
