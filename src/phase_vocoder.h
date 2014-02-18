@@ -23,10 +23,10 @@ class PhaseVocoder : public Filter {
     double m_speed_factor;
     
     uint16_t m_window_size;
+    double m_scaler;
 
     fftw_complex* m_slice;
     double* m_frame;
-
     fftw_plan m_istft;
 
   public:
