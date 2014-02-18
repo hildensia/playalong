@@ -32,7 +32,7 @@ std::vector<T> scale(std::vector<T> v) {
   return r;
 }
 template<class T>
-std::vector<T> scale(std::vector<T> v, T max) {
+std::vector<T> scale(std::vector<T> v, double max) {
   std::vector<T> r(v.size());
   for (uint i=0; i<v.size(); ++i)
     r[i] = v[i]/max;
