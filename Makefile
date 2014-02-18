@@ -6,6 +6,9 @@ LDFLAGS=-lavcodec -lavformat -lavutil -lstdc++ -lm -lao -lncurses
 
 OBJS = main.o player.o sound_stream.o curses_interface.o util.o
 
+ifndef DESTDIR
+DESTDIR=/usr/local
+endif
 
 default: playalong
 
@@ -16,7 +19,7 @@ playalong: $(OBJS)
 	$(CXX) $(CXXFLAGS) -c $<
 
 install: playalong
-	install playalong /usr/local/bin/playalong
+	install playalong $(DESTDIR)/bin/playalong
 
 clean:
 	rm *.o
