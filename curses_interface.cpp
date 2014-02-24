@@ -67,6 +67,24 @@ void CursesInterface::key_management() {
     case KEY_RIGHT:
       m_player.seek(m_player.get_pos() + 500);  
       break;
+    case KEY_SLEFT:
+      m_player.seek(m_player.get_pos() - 5000);  
+      break;
+    case KEY_SRIGHT:
+      m_player.seek(m_player.get_pos() + 5000);  
+      break;
+    case KEY_DOWN:
+      m_player.seek(m_player.get_pos() - 30000);  
+      break;
+    case KEY_UP:
+      m_player.seek(m_player.get_pos() + 30000);  
+      break;
+    case KEY_PPAGE:
+      m_player.seek(m_player.get_pos() - 300000);  
+      break;
+    case KEY_NPAGE:
+      m_player.seek(m_player.get_pos() + 300000);  
+      break;
     case 'd':
       m_player.set_marker(Marker_A, m_player.get_pos());
       break;
