@@ -29,13 +29,13 @@ Keymaps
 
 
     Used keys are (think of two arrow crosses):
-    ____________________________
-    |                          |
-    | q   e       u            |
-    |   s d f   h j k          |
-    |                          |
-    |      [space]      <   >  |
-    |__________________________|
+    __________________________________
+    |                                |
+    | q   e       u             PgUp |
+    |   s d f   h j k           PgDn |
+    |                     ^          |
+    |      [space]      < v >        |
+    |________________________________|
 
     q - Quit
 
@@ -50,7 +50,10 @@ Keymaps
     k - move marker b right (+10 ms)
 
     [space] - pause
-    [left/right arrow] - seek in song
+    [left/right arrow] - seek in song (.5 s)
+    [shift] + [left/right arrow] - seek in song (5 s)
+    [up/down arrow] - seek in song (30 s)
+    [Page up/down] - seek in song (5 min)
 
 Installation
 ------------
