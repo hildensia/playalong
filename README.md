@@ -15,7 +15,7 @@ Features
 * Plays to whatever libao supports (alsa, oss...)
 * Very fine grained loop adjusting (+/- 10 ms)
 * A very simple ncurses interface
-* (although I didn't tested it yet, it should be more or less platform
+* (although I didn't test it yet, it should be more or less platform
   agnostic)
 
 
